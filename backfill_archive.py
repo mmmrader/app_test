@@ -19,8 +19,9 @@ log = logging.getLogger(__name__)
 
 ARCHIVE_DIR = "archive"
 INDEX_FILE = "index.json"
+LATEST_FILE = "latest.json" # <-- ДОДАНО
 
-# --- Функції, скопійовані з check_updates.py ---
+# --- (Функції parse_schedule_message та write_json_file - без змін) ---
 
 def parse_schedule_message(text):
     change_time_match = re.search(r'Зміни на (\d{2}:\d{2} \d{2}\.\d{2}\.\d{4})', text)
@@ -54,8 +55,6 @@ def write_json_file(path, data):
 def main_backfill():
     log.info(f"Початок сканування {SCAN_LIMIT} повідомлень з {CHANNEL_USERNAME}...")
     
-    # Словник для зберігання { "2025-11-12": data, ... }
-    # Це автоматично збереже лише ОСТАННЄ оновлення за кожен день
     all_schedules = {} 
     
     client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
@@ -66,9 +65,7 @@ def main_backfill():
         for msg in messages:
             if not msg.text:
                 continue
-                
             new_data, schedule_date = parse_schedule_message(msg.text)
-            
             if new_data:
                 # Зберігаємо у словник. Новіші поверх старих.
                 if schedule_date not in all_schedules:
@@ -85,7 +82,6 @@ def main_backfill():
     for date_iso, data in all_schedules.items():
         archive_path = os.path.join(ARCHIVE_DIR, f"{date_iso}.json")
         write_json_file(archive_path, data)
-
     log.info(f"Папку {ARCHIVE_DIR} заповнено.")
 
     # 2. Створюємо index.json
@@ -93,8 +89,17 @@ def main_backfill():
     index_data = {"available_dates": available_dates}
     write_json_file(INDEX_FILE, index_data)
     log.info(f"Файл {INDEX_FILE} створено.")
+    
+    # --- 👇 НОВИЙ БЛОК 👇 ---
+    # 3. Створюємо latest.json (беремо найсвіжіший графік з архіву)
+    if available_dates:
+        latest_date = available_dates[0] # "YYYY-MM-DD"
+        latest_data = all_schedules[latest_date]
+        write_json_file(LATEST_FILE, latest_data)
+        log.info(f"Файл {LATEST_FILE} створено (на основі {latest_date}).")
+    # -----------------------
 
-    print("\n[V] Заповнення архіву завершено! Тепер можна завантажити (push) папку 'archive' та 'index.json' у репозиторій.")
+    print("\n[V] Заповнення архіву завершено! Тепер можна завантажити (push) папку 'archive', 'index.json' та 'latest.json' у репозиторій.")
 
 if __name__ == "__main__":
     main_backfill()
