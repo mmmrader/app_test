@@ -1,0 +1,82 @@
+{
+  "change_timestamp_str": "15:52 23.10.2025",
+  "schedule_date_str": "23.10.2025",
+  "queues": [
+    {
+      "queue_name": "1.1",
+      "times": [
+        "09-10",
+        "17-19"
+      ]
+    },
+    {
+      "queue_name": "1.2",
+      "times": [
+        "09-10",
+        "17-19"
+      ]
+    },
+    {
+      "queue_name": "2.1",
+      "times": [
+        "09-10",
+        "17-19"
+      ]
+    },
+    {
+      "queue_name": "2.2",
+      "times": [
+        "19-21"
+      ]
+    },
+    {
+      "queue_name": "3.1",
+      "times": [
+        "19-21"
+      ]
+    },
+    {
+      "queue_name": "3.2",
+      "times": [
+        "19-21"
+      ]
+    },
+    {
+      "queue_name": "4.1",
+      "times": [
+        "21-23"
+      ]
+    },
+    {
+      "queue_name": "4.2",
+      "times": [
+        "21-23"
+      ]
+    },
+    {
+      "queue_name": "5.1",
+      "times": [
+        "07-09",
+        "21-23"
+      ]
+    },
+    {
+      "queue_name": "5.2",
+      "times": [
+        "-"
+      ]
+    },
+    {
+      "queue_name": "6.1",
+      "times": [
+        "07-09"
+      ]
+    },
+    {
+      "queue_name": "6.2",
+      "times": [
+        "07-09"
+      ]
+    }
+  ]
+}
