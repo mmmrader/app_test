@@ -10,7 +10,6 @@ import logging
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-# !!! ЗАМІНІТЬ НА НАЗВУ ВАШОГО КАНАЛУ !!!
 CHANNEL_USERNAME = 'SvitloOleksandriyskohoRaionu' 
 
 # Назви файлів та папок

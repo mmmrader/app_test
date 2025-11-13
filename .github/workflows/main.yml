@@ -8,32 +8,41 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    # --- 👇 ДОДАЙТЕ ЦІ ДВА РЯДКИ 👇 ---
+    permissions:
+      contents: write
+    # ------------------------------------
+
     steps:
+      # 1. Завантажуємо код (це потрібно, щоб checkout v4 мав правильні права)
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2. Встановлюємо Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
+      # 3. Встановлюємо бібліотеки
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # 4. ЗАПУСКАЄМО НАШ СКРИПТ
       - name: Run Python script
         env:
           API_ID: ${{ secrets.API_ID }}
           API_HASH: ${{ secrets.API_HASH }}
           TELETHON_SESSION: ${{ secrets.TELETHON_SESSION }}
-          CHANNEL_USERNAME: 'SvitloOleksandriyskohoRaionu' # <-- ЗАМЕНИТЕ
+          CHANNEL_USERNAME: 'SvitloOleksandriyskohoRaionu'
         run: python check_updates.py
 
-      # ЭТОТ БЛОК КОММИТИТ ВСЕ ИЗМЕНЕНИЯ
+      # 5. КОМІТИМО ЗМІНИ
       - name: Commit and push if files changed
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'Авто-обновление графиков'
-          # Не указываем file_pattern, чтобы коммитить ВСЕ файлы
-          # (latest.json, index.json и archive/DATE.json)
+          commit_message: 'Авто-оновлення графіків'
+          # Ми більше не використовуємо file_pattern, щоб комітити ВСІ файли
