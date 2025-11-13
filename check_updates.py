@@ -9,7 +9,7 @@ from telethon.sessions import StringSession
 # Имя файла, где будет лежать последнее расписание
 JSON_FILE_NAME = 'latest_schedule.json' 
 # Имя пользователя канала (публичного)
-CHANNEL_USERNAME = 'app_test' # <-- ЗАМЕНИТЕ НА ИМЯ КАНАЛА
+CHANNEL_USERNAME = 'SvitloOleksandriyskohoRaionu' # <-- ЗАМЕНИТЕ НА ИМЯ КАНАЛА
 # -----------------
 
 # --- Загрузка Секретов из GitHub Actions ---
