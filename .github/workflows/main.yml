@@ -36,7 +36,7 @@ jobs:
           API_ID: ${{ secrets.API_ID }}
           API_HASH: ${{ secrets.API_HASH }}
           TELETHON_SESSION: ${{ secrets.TELETHON_SESSION }}
-          CHANNEL_USERNAME: 'YourChannelUsername' # <-- ЗАМЕНИТЕ НА ИМЯ КАНАЛА
+          CHANNEL_USERNAME: 'SvitloOleksandriyskohoRaionu' # <-- ЗАМЕНИТЕ НА ИМЯ КАНАЛА
         run: python check_updates.py
 
       # 5. КОММИТИМ ИЗМЕНЕНИЯ (если файл latest_schedule.json изменился)
