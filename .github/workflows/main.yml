@@ -1,50 +1,39 @@
 name: Check Telegram Schedule
 
 on:
-  # 1. Запускать по расписанию: каждые 15 минут
   schedule:
     - cron: '*/15 * * * *'
-    
-  # 2. Позволяет запускать вручную со страницы "Actions"
   workflow_dispatch:
 
-permissions:
-  contents: write
-  
 jobs:
   build:
-    runs-on: ubuntu-latest # Используем сервер Ubuntu
-
+    runs-on: ubuntu-latest
     steps:
-      # 1. Загружаем код из нашего репозитория на сервер
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Устанавливаем Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10' # Указываем версию Python
+          python-version: '3.10'
 
-      # 3. Устанавливаем наши библиотеки (telethon)
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # 4. ЗАПУСКАЕМ НАШ СКРИПТ
       - name: Run Python script
         env:
-          # Передаем наши секреты в скрипт
           API_ID: ${{ secrets.API_ID }}
           API_HASH: ${{ secrets.API_HASH }}
           TELETHON_SESSION: ${{ secrets.TELETHON_SESSION }}
-          CHANNEL_USERNAME: 'SvitloOleksandriyskohoRaionu' # <-- ЗАМЕНИТЕ НА ИМЯ КАНАЛА
+          CHANNEL_USERNAME: 'SvitloOleksandriyskohoRaionu' # <-- ЗАМЕНИТЕ
         run: python check_updates.py
 
-      # 5. КОММИТИМ ИЗМЕНЕНИЯ (если файл latest_schedule.json изменился)
+      # ЭТОТ БЛОК КОММИТИТ ВСЕ ИЗМЕНЕНИЯ
       - name: Commit and push if files changed
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: 'Авто-обновление графика отключений'
-          file_pattern: latest_schedule.json # Отслеживать изменения только в этом файле
+          commit_message: 'Авто-обновление графиков'
+          # Не указываем file_pattern, чтобы коммитить ВСЕ файлы
+          # (latest.json, index.json и archive/DATE.json)

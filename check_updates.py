@@ -4,33 +4,40 @@ import json
 import datetime
 from telethon.sync import TelegramClient
 from telethon.sessions import StringSession
+import logging
 
 # --- Настройки ---
-# Имя файла, где будет лежать последнее расписание
-JSON_FILE_NAME = 'latest_schedule.json' 
-# Имя пользователя канала (публичного)
-CHANNEL_USERNAME = 'SvitloOleksandriyskohoRaionu' # <-- ЗАМЕНИТЕ НА ИМЯ КАНАЛА
-# -----------------
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
 
-# --- Загрузка Секретов из GitHub Actions ---
+CHANNEL_USERNAME = 'SvitloOleksandriyskohoRaionu' # <-- ЗАМЕНИТЕ
+ARCHIVE_DIR = "archive"
+LATEST_FILE = "latest.json"
+INDEX_FILE = "index.json"
+
+# --- Загрузка Секретов ---
 API_ID = os.environ.get('API_ID')
 API_HASH = os.environ.get('API_HASH')
 SESSION_STRING = os.environ.get('TELETHON_SESSION')
-# -----------------
 
 def parse_schedule_message(text):
-    """
-    Парсит текстовое сообщение.
-    (Код парсера из нашего прошлого ответа)
-    """
+    """Парсит текстовое сообщение."""
     change_time_match = re.search(r'Зміни на (\d{2}:\d{2} \d{2}\.\d{2}\.\d{4})', text)
     change_time = change_time_match.group(1) if change_time_match else None
     
-    schedule_date_match = re.search(r'(\d{2}\.\d{2}\.\d{4}) внесено зміни', text)
-    schedule_date = schedule_date_match.group(1) if schedule_date_match else None
+    # Ищем дату, НА которую действует график (важнейшее поле)
+    # "НЕК "Укренерго" 12.11.2025 внесено зміни"
+    schedule_date_match = re.search(r'(\d{2})\.(\d{2})\.(\d{4}) внесено зміни', text)
+    
+    if not schedule_date_match:
+        # Если не нашли дату графика, это не то сообщение
+        return None, None
+
+    # Форматируем дату в YYYY-MM-DD для имени файла
+    day, month, year = schedule_date_match.groups()
+    schedule_date_iso = f"{year}-{month}-{day}" # "2025-11-12"
     
     queue_matches = re.findall(r'(Черга [\d\.]+): (.*)', text)
-    
     queues = []
     for match in queue_matches:
         queue_name = match[0].replace('Черга ', '').strip()
@@ -38,65 +45,82 @@ def parse_schedule_message(text):
         queues.append({"queue_name": queue_name, "times": times})
         
     if not queues:
-        return None
+        return None, None
         
-    return {
+    data = {
         "change_timestamp_str": change_time,
-        "schedule_date_str": schedule_date,
+        "schedule_date_str": f"{day}.{month}.{year}", # "12.11.2025"
         "queues": queues
     }
+    
+    return data, schedule_date_iso
 
-def read_old_data():
-    """Читает старые данные из JSON-файла, если он есть."""
+def read_json_file(path, default_data):
+    """Безопасно читает JSON."""
     try:
-        with open(JSON_FILE_NAME, 'r', encoding='utf-8') as f:
+        with open(path, 'r', encoding='utf-8') as f:
             return json.load(f)
-    except FileNotFoundError:
-        print("Файл latest_schedule.json не найден. Будет создан новый.")
-        return {} # Возвращаем пустой словарь, если файла нет
-    except json.JSONDecodeError:
-        print("Ошибка чтения JSON. Файл будет перезаписан.")
-        return {}
+    except (FileNotFoundError, json.JSONDecodeError):
+        return default_data
+
+def write_json_file(path, data):
+    """Записывает JSON."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
 def main():
-    print(f"[{datetime.datetime.now()}] Запуск проверки обновлений...")
+    log.info("Запуск проверки обновлений...")
     
-    if not API_ID or not API_HASH or not SESSION_STRING:
-        print("Ошибка: Секреты API_ID, API_HASH или TELETHON_SESSION не установлены.")
+    if not all([API_ID, API_HASH, SESSION_STRING]):
+        log.error("Критические секреты (API_ID, API_HASH, SESSION) не найдены.")
         return
 
     client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
 
     with client:
-        print(f"Подключение к Telegram... Чтение канала: {CHANNEL_USERNAME}")
-        # Получаем последнее сообщение из канала
+        log.info(f"Подключение к Telegram... Чтение канала: {CHANNEL_USERNAME}")
         try:
             last_message = client.get_messages(CHANNEL_USERNAME, limit=1)[0]
         except Exception as e:
-            print(f"Ошибка получения сообщения из канала: {e}")
+            log.error(f"Ошибка получения сообщения: {e}")
             return
             
-        print("Получено последнее сообщение. Начинаем парсинг...")
-        new_data = parse_schedule_message(last_message.text)
+        new_data, schedule_date = parse_schedule_message(last_message.text)
         
         if not new_data:
-            print("Сообщение не похоже на график. Обновление не требуется.")
+            log.info("Сообщение не похоже на график. Пропуск.")
             return
 
-        print(f"Распознан график от: {new_data.get('change_timestamp_str')}")
+        log.info(f"Распознан график от {new_data['change_timestamp_str']} на дату {schedule_date}")
+
+        # --- Логика Архива ---
+        # 1. Загружаем старый latest.json для сравнения
+        old_latest = read_json_file(LATEST_FILE, {})
         
-        # --- Главная логика: Сравнение ---
-        old_data = read_old_data()
-        
-        # Сравниваем по времени изменения. Если время то же, ничего не делаем.
-        if old_data.get('change_timestamp_str') == new_data.get('change_timestamp_str'):
-            print("Это тот же график, что и в прошлый раз. Обновление не требуется.")
-        else:
-            print("!!! Обнаружен НОВЫЙ график! Запись в файл...")
-            # Записываем новые данные в файл
-            with open(JSON_FILE_NAME, 'w', encoding='utf-8') as f:
-                json.dump(new_data, f, ensure_ascii=False, indent=4)
-            print(f"Файл {JSON_FILE_NAME} успешно обновлен.")
+        if old_latest.get('change_timestamp_str') == new_data.get('change_timestamp_str'):
+            log.info("Это тот же график, что и в прошлый раз. Обновление не требуется.")
+            return
+
+        log.info("!!! Обнаружен НОВЫЙ график! Обновляем файлы...")
+
+        # 2. Сохраняем новый LATEST.JSON
+        write_json_file(LATEST_FILE, new_data)
+        log.info(f"Файл {LATEST_FILE} обновлен.")
+
+        # 3. Сохраняем копию в АРХИВ (например, archive/2025-11-12.json)
+        archive_path = os.path.join(ARCHIVE_DIR, f"{schedule_date}.json")
+        write_json_file(archive_path, new_data)
+        log.info(f"Файл архива {archive_path} обновлен.")
+
+        # 4. Обновляем INDEX.JSON (список всех дат в архиве)
+        index_data = read_json_file(INDEX_FILE, {"available_dates": []})
+        if schedule_date not in index_data["available_dates"]:
+            index_data["available_dates"].append(schedule_date)
+            # Сортируем, чтобы новые даты были вверху
+            index_data["available_dates"].sort(reverse=True) 
+            write_json_file(INDEX_FILE, index_data)
+            log.info(f"Файл {INDEX_FILE} обновлен, добавлена дата {schedule_date}.")
 
 if __name__ == "__main__":
     main()
