@@ -1,5 +1,5 @@
 {
-  "change_timestamp_str": "29.12.2025",
+  "change_timestamp_str": "06:42 29.12.2025",
   "schedule_date_str": "29.12.2025",
   "queues": [
     {
@@ -26,7 +26,6 @@
     {
       "queue_name": "3.1",
       "times": [
-        "02-04",
         "06-08",
         "10-12",
         "14-16",
