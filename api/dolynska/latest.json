@@ -1,23 +1,24 @@
 {
-  "change_timestamp_str": "22:02 03.03.2026",
-  "schedule_date_str": "03.03.2026",
+  "change_timestamp_str": "08:55 04.03.2026",
+  "schedule_date_str": "04.03.2026",
   "queues": [
     {
       "queue_name": "1.1",
       "times": [
-        "20-21"
+        "08-10",
+        "20-22"
       ]
     },
     {
       "queue_name": "1.2",
       "times": [
-        "20-21"
+        "08-09"
       ]
     },
     {
       "queue_name": "2.1",
       "times": [
-        "20-22"
+        "08-09"
       ]
     },
     {
@@ -29,49 +30,50 @@
     {
       "queue_name": "3.1",
       "times": [
-        "16-18"
+        "12-14"
       ]
     },
     {
       "queue_name": "3.2",
       "times": [
-        "16-18"
+        "-"
       ]
     },
     {
       "queue_name": "4.1",
       "times": [
-        "18-20"
+        "22-24"
       ]
     },
     {
       "queue_name": "4.2",
       "times": [
-        "18-20"
+        "14-16"
       ]
     },
     {
       "queue_name": "5.1",
       "times": [
-        "18-20"
+        "-"
       ]
     },
     {
       "queue_name": "5.2",
       "times": [
-        "15-16"
+        "18-20"
       ]
     },
     {
       "queue_name": "6.1",
       "times": [
-        "15-16"
+        "18-20"
       ]
     },
     {
       "queue_name": "6.2",
       "times": [
-        "-"
+        "10-12",
+        "18-20"
       ]
     }
   ]
