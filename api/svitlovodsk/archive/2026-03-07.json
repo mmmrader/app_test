@@ -1,17 +1,17 @@
 {
-  "change_timestamp_str": "17:45 07.03.2026",
+  "change_timestamp_str": "18:42 07.03.2026",
   "schedule_date_str": "07.03.2026",
   "queues": [
     {
       "queue_name": "1.1",
       "times": [
-        "-"
+        "20-21"
       ]
     },
     {
       "queue_name": "1.2",
       "times": [
-        "-"
+        "20-21"
       ]
     },
     {
@@ -41,25 +41,25 @@
     {
       "queue_name": "4.1",
       "times": [
-        "-"
+        "18:30-20:00"
       ]
     },
     {
       "queue_name": "4.2",
       "times": [
-        "-"
+        "18:30-20:00"
       ]
     },
     {
       "queue_name": "5.1",
       "times": [
-        "-"
+        "18:30-20:00"
       ]
     },
     {
       "queue_name": "5.2",
       "times": [
-        "-"
+        "19-20"
       ]
     },
     {
