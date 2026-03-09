@@ -1,15 +1,9 @@
 {
-  "change_timestamp_str": "09:36 09.03.2026",
+  "change_timestamp_str": "16:31 09.03.2026",
   "schedule_date_str": "09.03.2026",
   "queues": [
     {
       "queue_name": "1.1",
-      "times": [
-        "18-20"
-      ]
-    },
-    {
-      "queue_name": "1.2",
       "times": [
         "18-20"
       ]
@@ -21,31 +15,13 @@
       ]
     },
     {
-      "queue_name": "2.2",
-      "times": [
-        "22-24"
-      ]
-    },
-    {
       "queue_name": "3.1",
       "times": [
         "-"
       ]
     },
     {
-      "queue_name": "3.2",
-      "times": [
-        "-"
-      ]
-    },
-    {
       "queue_name": "4.1",
-      "times": [
-        "20-22"
-      ]
-    },
-    {
-      "queue_name": "4.2",
       "times": [
         "20-22"
       ]
@@ -58,21 +34,9 @@
       ]
     },
     {
-      "queue_name": "5.2",
-      "times": [
-        "17-18"
-      ]
-    },
-    {
       "queue_name": "6.1",
       "times": [
-        "17-18"
-      ]
-    },
-    {
-      "queue_name": "6.2",
-      "times": [
-        "17-18"
+        "-"
       ]
     }
   ]
