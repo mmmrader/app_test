@@ -1,17 +1,17 @@
 {
-  "change_timestamp_str": "16:31 09.03.2026",
+  "change_timestamp_str": "17:49 09.03.2026",
   "schedule_date_str": "09.03.2026",
   "queues": [
     {
       "queue_name": "1.1",
       "times": [
-        "18-20"
+        "-"
       ]
     },
     {
       "queue_name": "2.1",
       "times": [
-        "18-20"
+        "-"
       ]
     },
     {
@@ -23,14 +23,13 @@
     {
       "queue_name": "4.1",
       "times": [
-        "20-22"
+        "-"
       ]
     },
     {
       "queue_name": "5.1",
       "times": [
-        "08:00-09:30",
-        "20-22"
+        "08:00-09:30"
       ]
     },
     {
