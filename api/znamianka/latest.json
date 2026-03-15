@@ -1,6 +1,6 @@
 {
-  "change_timestamp_str": "14.03.2026",
-  "schedule_date_str": "14.03.2026",
+  "change_timestamp_str": "16.03.2026",
+  "schedule_date_str": "16.03.2026",
   "queues": [
     {
       "queue_name": "1.1",
@@ -11,13 +11,13 @@
     {
       "queue_name": "1.2",
       "times": [
-        "18-20"
+        "-"
       ]
     },
     {
       "queue_name": "2.1",
       "times": [
-        "-"
+        "18-20"
       ]
     },
     {
@@ -41,25 +41,25 @@
     {
       "queue_name": "4.1",
       "times": [
-        "-"
+        "20-22"
       ]
     },
     {
       "queue_name": "4.2",
       "times": [
-        "-"
+        "17-18"
       ]
     },
     {
       "queue_name": "5.1",
       "times": [
-        "17-18"
+        "-"
       ]
     },
     {
       "queue_name": "5.2",
       "times": [
-        "20-22"
+        "-"
       ]
     },
     {
