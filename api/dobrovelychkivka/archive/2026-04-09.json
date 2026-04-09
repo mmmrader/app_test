@@ -1,5 +1,5 @@
 {
-  "change_timestamp_str": "13:42 09.04.2026",
+  "change_timestamp_str": "16:02 09.04.2026",
   "schedule_date_str": "09.04.2026",
   "queues": [
     {
@@ -25,7 +25,8 @@
     {
       "queue_name": "2.2",
       "times": [
-        "09-10"
+        "09-10",
+        "16-18"
       ]
     },
     {
