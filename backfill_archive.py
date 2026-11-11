@@ -8,7 +8,7 @@ import logging
 
 # --- ‼️ ВСТАВЬТЕ ВАШИ ДАННЫЕ ‼️ ---
 API_ID = 33067680 # Ваш API ID
-API_HASH = "bc363088d2d73599c75824845e2956c9" # Ваш API Hash
+API_HASH = "bc363088d2d73599c75824845e2956c9 " # Ваш API Hash
 SESSION_STRING = "1ApWapzMBu4o-t2RzvH8CsKshPvoT1nOLyGwhfyHsJAVNL_yk_HGuiCBhPTdlWFt04Z1RxKC1XfPE89wnEYtMRbTKoHmQWMjmuKNgfKn3v2oodUzguos_fO6Bk_ZXV6RP-nBo_9fgfRGqwW2Fac-XabsmsX6Q5jrMgx1DSO7M0fb3TZY6e60IYDrxZho2sLz43qfOMOsOCm8BsQhVpFxejbaAk_iwjes6PPX54rLY2RcrzMpni7wvpkVI113_9wb0AXQngg4NgdYG6VdLjnmZOwYduFXm0PFk-M4RvMBAenPwkqXapzjF3Wq4HJj8FdrrpREuhjmXJTWbQbjCiJi3evL0_YZJNOE=" # Ваша TELETHON_SESSION
 CHANNEL_USERNAME = "SvitloOleksandriyskohoRaionu"
 SCAN_LIMIT = 20 # Скануємо останні 20 повідомлень для кожного каналу
