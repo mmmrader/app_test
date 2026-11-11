@@ -42,30 +42,46 @@ REGIONS = {
 BASE_OUTPUT_DIR = "api" # Папка, де будуть лежати підпапки регіонів
 
 def parse_schedule_message(text):
-    # Універсальний парсер (підтримує обидва формати)
-    date_pattern = r"За розпорядженням НЕК \"Укренерго\" (\d{2})\.(\d{2})\.(\d{4}) (?:буде діяти|внесено зміни)"
-    schedule_date_match = re.search(date_pattern, text)
-    if not schedule_date_match: return None, None
+    # 1. Пошук дати графіку (підтримує нові та старі формати)
+    date_pattern_1 = r"^(\d{2})\.(\d{2})\.(\d{4}) за розпорядженням НЕК \"Укренерго\" буде діяти"
+    date_pattern_2 = r"На (\d{2})\.(\d{2})\.(\d{4}) за розпорядженням НЕК \"Укренерго\" внесено зміни"
+    old_pattern = r"За розпорядженням НЕК \"Укренерго\" (\d{2})\.(\d{2})\.(\d{4})"
+
+    schedule_date_match = (
+        re.search(date_pattern_1, text, re.IGNORECASE) or 
+        re.search(date_pattern_2, text, re.IGNORECASE) or
+        re.search(old_pattern, text, re.IGNORECASE)
+    )
     
+    if not schedule_date_match: 
+        return None, None
+
     day, month, year = schedule_date_match.groups()
     schedule_date_str = f"{day}.{month}.{year}"
     schedule_date_iso = f"{year}-{month}-{day}"
-    
-    change_time_match = re.search(r'Зміни на (\d{2}:\d{2} \d{2}\.\d{2}\.\d{4})', text)
-    change_time = change_time_match.group(1) if change_time_match else None
-    
+
+    # 2. Пошук часу змін (станом на ХХ:ХХ ДД.ММ.YYYY або старий варіант)
+    change_time_match = re.search(r'станом на (\d{2}:\d{2}\s+\d{2}\.\d{2}\.\d{4})', text, re.IGNORECASE)
+    if not change_time_match:
+        change_time_match = re.search(r'Зміни на (\d{2}:\d{2} \d{2}\.\d{2}\.\d{4})', text, re.IGNORECASE)
+
+    # Нормалізуємо пробіли, якщо в «станом на  23:44» подвійний пробіл
+    change_time = re.sub(r'\s+', ' ', change_time_match.group(1)).strip() if change_time_match else None
+
+    # 3. Парсинг черг та годин відключень
     queue_matches = re.findall(r'(Черга [\d\.]+): (.*)', text)
     queues = []
     for match in queue_matches:
         queue_name = match[0].replace('Черга ', '').strip()
         times = [t.strip() for t in match[1].split(',')]
         queues.append({"queue_name": queue_name, "times": times})
-        
-    if not queues: return None, None
-    
+
+    if not queues: 
+        return None, None
+
     if not change_time:
         change_time = schedule_date_str 
-        
+
     data = {
         "change_timestamp_str": change_time,
         "schedule_date_str": schedule_date_str,
@@ -87,8 +103,7 @@ def write_json_file(path, data):
 
 def process_region(client, region_id, channel_username):
     log.info(f"--- Обробка регіону: {region_id} ---")
-    
-    # Структура: api/{region_id}/latest.json
+
     region_dir = os.path.join(BASE_OUTPUT_DIR, region_id)
     latest_file = os.path.join(region_dir, "latest.json")
     archive_dir = os.path.join(region_dir, "archive")
@@ -122,7 +137,7 @@ def process_region(client, region_id, channel_username):
     log.info(f"!!! Оновлення даних !!!")
     write_json_file(latest_file, new_data)
     write_json_file(os.path.join(archive_dir, f"{schedule_date}.json"), new_data)
-    
+
     index_data = read_json_file(index_file, {"available_dates": []})
     if schedule_date not in index_data["available_dates"]:
         index_data["available_dates"].append(schedule_date)
@@ -130,9 +145,10 @@ def process_region(client, region_id, channel_username):
         write_json_file(index_file, index_data)
 
 def main():
-    if not all([API_ID, API_HASH, SESSION_STRING]):
-        log.error("Секрети не знайдено.")
-        return
+    if not all([API_ID, API_HASH, SESSION_SESSION if 'SESSION_SESSION' in globals() else SESSION_STRING]): # зберіг сумісність
+        if not all([API_ID, API_HASH, SESSION_STRING]):
+            log.error("Секрети не знайдено.")
+            return
 
     client = TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH)
     with client:
@@ -141,3 +157,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+ 
