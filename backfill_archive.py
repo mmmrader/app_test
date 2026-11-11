@@ -8,12 +8,12 @@ import logging
 
 # --- ‼️ ВСТАВЬТЕ ВАШИ ДАННЫЕ ‼️ ---
 API_ID = 33067680 # Ваш API ID
-API_HASH = "bc363088d2d73599c75824845e2956c9 " # Ваш API Hash
+API_HASH = "bc363088d2d73599c75824845e2956c9" # Ваш API Hash (прибрано зайвий пробіл у кінці)
 SESSION_STRING = "1ApWapzMBu4o-t2RzvH8CsKshPvoT1nOLyGwhfyHsJAVNL_yk_HGuiCBhPTdlWFt04Z1RxKC1XfPE89wnEYtMRbTKoHmQWMjmuKNgfKn3v2oodUzguos_fO6Bk_ZXV6RP-nBo_9fgfRGqwW2Fac-XabsmsX6Q5jrMgx1DSO7M0fb3TZY6e60IYDrxZho2sLz43qfOMOsOCm8BsQhVpFxejbaAk_iwjes6PPX54rLY2RcrzMpni7wvpkVI113_9wb0AXQngg4NgdYG6VdLjnmZOwYduFXm0PFk-M4RvMBAenPwkqXapzjF3Wq4HJj8FdrrpREuhjmXJTWbQbjCiJi3evL0_YZJNOE=" # Ваша TELETHON_SESSION
 CHANNEL_USERNAME = "SvitloOleksandriyskohoRaionu"
 SCAN_LIMIT = 20 # Скануємо останні 20 повідомлень для кожного каналу
 
-# Список регіонів (Той самий, що і в check_updates.py)
+# Список регіонів
 REGIONS = {
     "oleksandriya": "SvitloOleksandriyskohoRaionu",
     "blagovischenske": "SvitloBlagovishenskogoRajonu",
@@ -24,7 +24,7 @@ REGIONS = {
     "oleksandrivka": "SvitloOleksandrivskogoRaionu",
     "petrove": "SvitloPetrivskohoRaionu",
     "bobrynets": "SvitloBobrynetskohoRaionu",
-    "dobrovelychkivka": "SvitloDobrovelychkivskogoRaionu",
+    "dobrovelychkivka": "SvitloDobrovelychkivskogoRajonu",
     "kropyvnytskyi_city": "SvitloKropyvnytskyiMisto",
     "kropyvnytskyi_district": "SvitloKropyvnytskohoRaionu",
     "malovyskiv": "SvitloMalovyskivskohoRaionu",
@@ -43,18 +43,33 @@ logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
 def parse_schedule_message(text):
-    date_pattern = r"За розпорядженням НЕК \"Укренерго\" (\d{2})\.(\d{2})\.(\d{4}) (?:буде діяти|внесено зміни)"
-    schedule_date_match = re.search(date_pattern, text)
+    # 1. Пошук дати графіку (підтримує нові та старі формати)
+    date_pattern_1 = r"^(\d{2})\.(\d{2})\.(\d{4}) за розпорядженням НЕК \"Укренерго\" буде діяти"
+    date_pattern_2 = r"На (\d{2})\.(\d{2})\.(\d{4}) за розпорядженням НЕК \"Укренерго\" внесено зміни"
+    old_pattern = r"За розпорядженням НЕК \"Укренерго\" (\d{2})\.(\d{2})\.(\d{4})"
+
+    schedule_date_match = (
+        re.search(date_pattern_1, text, re.IGNORECASE) or 
+        re.search(date_pattern_2, text, re.IGNORECASE) or
+        re.search(old_pattern, text, re.IGNORECASE)
+    )
     
-    if not schedule_date_match: return None, None
+    if not schedule_date_match: 
+        return None, None
 
     day, month, year = schedule_date_match.groups()
     schedule_date_str = f"{day}.{month}.{year}"
     schedule_date_iso = f"{year}-{month}-{day}"
 
-    change_time_match = re.search(r'Зміни на (\d{2}:\d{2} \d{2}\.\d{2}\.\d{4})', text)
-    change_time = change_time_match.group(1) if change_time_match else None
+    # 2. Пошук часу змін («станом на ХХ:ХХ ДД.ММ.YYYY» або старий варіант)
+    change_time_match = re.search(r'станом на (\d{2}:\d{2}\s+\d{2}\.\d{2}\.\d{4})', text, re.IGNORECASE)
+    if not change_time_match:
+        change_time_match = re.search(r'Зміни на (\d{2}:\d{2} \d{2}\.\d{2}\.\d{4})', text, re.IGNORECASE)
 
+    # Нормалізуємо пробіли
+    change_time = re.sub(r'\s+', ' ', change_time_match.group(1)).strip() if change_time_match else None
+
+    # 3. Парсинг черг та годин відключень
     queue_matches = re.findall(r'(Черга [\d\.]+): (.*)', text)
     queues = []
     for match in queue_matches:
@@ -62,7 +77,8 @@ def parse_schedule_message(text):
         times = [t.strip() for t in match[1].split(',')]
         queues.append({"queue_name": queue_name, "times": times})
         
-    if not queues: return None, None
+    if not queues: 
+        return None, None
         
     if not change_time:
         change_time = schedule_date_str 
